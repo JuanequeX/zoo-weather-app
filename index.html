@@ -1,66 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
-
-  <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon-32x32.png">
-  
-  <title>Frontend Mentor | Weather app</title>
-
-  <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
-  <style>
-    .attribution { font-size: 0.6875rem; text-align: center; }
-    .attribution a { color: hsl(228, 45%, 44%); }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-  Units
+  <main class="container">
+    <h1>How's the sky looking today?</h1>
 
-  Switch to Imperial/Metric
+    <div class="search-wrap">
+      <div class="search-row">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            id="cityInput"
+            placeholder="Search for a place..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div class="loader" id="loader"></div>
+        </div>
+        <button id="searchBtn">Search</button>
+      </div>
 
-  Temperature
+      <!-- Dropdown results -->
+      <div class="dropdown" id="dropdown">
+        <ul class="results-list" id="resultsList" role="listbox"></ul>
+      </div>
+    </div>
 
-  Celsius (°C)
-  Fahrenheit (°F)
+    <!-- Empty state -->
+    <p class="no-results-msg" id="noResults"></p>
+  </main>
 
-  Wind Speed
-
-  km/h
-  mph
-
-  Precipitation
-
-  Millimeters (mm)
-  Inches (in)
-
-  How's the sky looking today?
-
-  Search for a city, e.g., New York
-  Search
-
-  Feels like
-  <!-- Insert temperature here -->
-
-  Humidity
-  <!-- Insert humidity here -->
-
-  Wind
-  <!-- Insert wind here -->   
-  
-  Precipitation
-  <!-- Insert precipitation here -->
-
-  Daily forecast
-  <!-- Insert daily forecast for the next 7 days here -->
-
-  Hourly forecast
-  <!-- Insert hourly forecast for the selected day here -->
-
-  <footer class="attribution">
-    Challenge by <a href="https://www.frontendmentor.io?ref=challenge">Frontend Mentor</a>. 
-    Coded by <a href="#">Your Name Here</a>.
-  </footer>
+  <script src="app.js"></script>
 </body>
 </html>
