@@ -9,7 +9,23 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+<header class="navbar">
+  <div class="navbar-logo">
+    <img src="assets/images/logo.svg" alt="Weather Now logo" height="28" />
+  </div>
 
+  <div class="units-dropdown">
+    <button class="units-btn" id="unitsBtn">
+      <img src="assets/images/icon-units.svg" alt="units" height="14" />
+      Units
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </button>
+  </div>
+</header>
+</div>
+</section>
   <main class="container">
     <h1>How's the sky looking today?</h1>
 
@@ -39,8 +55,18 @@
 
     <!-- Empty state -->
     <p class="no-results-msg" id="noResults"></p>
+    <!-- Tarjeta principal del clima -->
+    <section class="weather-card">
+      <div class="weather-card-left">
+        <h2 class="weather-city">Berlin, Germany</h2>
+        <p class="weather-date">Tuesday, Aug 5, 2025</p>
+      </div>
+      <div class="weather-card-right">
+        <img src="assets/images/icon-sunny.webp" alt="Sunny" class="weather-icon" />
+        <p class="weather-temp">68°</p>
+      </div>
+    </section>
   </main>
-
   <script src="app.js"></script>
 </body>
 </html>

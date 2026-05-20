@@ -195,10 +195,104 @@ h1 {
   display: none;
 }
 .no-results-msg.visible { display: block; }
+/* ── Navbar ── */
+.navbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+}
+
+/* ── Units button ── */
+.units-btn {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.units-btn img {
+  filter: brightness(0) invert(1);
+}
+
+/* ── Tarjeta principal del clima ── */
+.weather-card {
+  width: 100%;
+  max-width: 640px;
+  background: url('assets/images/bg-today-large.svg') center/cover no-repeat;
+  border-radius: 16px;
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.weather-city {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.weather-date {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.weather-card-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.weather-icon {
+  width: 64px;
+  height: 64px;
+}
+
+.weather-temp {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #ffffff;
+}
 
 /* ── Responsive ── */
 @media (max-width: 480px) {
   .result-coords { display: none; }
   .dropdown { right: 0; }
-  #searchBtn { padding: 16px 18px; }
+  .navbar { padding: 16px 20px; }
+
+  /* Buscador móvil */
+  .search-row { flex-direction: column; }
+  .search-box { width: 100%; }
+  #searchBtn { width: 100%; padding: 16px; }
+
+  /* Tarjeta clima móvil */
+  .weather-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    background-image: url('assets/images/bg-today-small.svg');
+  }
+
+  .weather-card-right {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 16px;
+  }
+
+  .weather-temp { font-size: 4rem; }
+  .weather-icon { width: 80px; height: 80px; }
 }
