@@ -1,5 +1,41 @@
 const API_BASE  = 'https://geocoding-api.open-meteo.com/v1/search';
+const WEATHER_API = 'https://api.open-meteo.com/v1/forecast';
 const DEBOUNCE  = 400;
+
+// Iconos según WMO weathercode (open-meteo)
+const WMO_ICON = {
+  0:  'icon-sunny.webp',
+  1:  'icon-sunny.webp',
+  2:  'icon-partly-cloudy.webp',
+  3:  'icon-overcast.webp',
+  45: 'icon-fog.webp',
+  48: 'icon-fog.webp',
+  51: 'icon-drizzle.webp',
+  53: 'icon-drizzle.webp',
+  55: 'icon-drizzle.webp',
+  61: 'icon-rain.webp',
+  63: 'icon-rain.webp',
+  65: 'icon-rain.webp',
+  71: 'icon-snow.webp',
+  73: 'icon-snow.webp',
+  75: 'icon-snow.webp',
+  80: 'icon-rain.webp',
+  81: 'icon-rain.webp',
+  82: 'icon-rain.webp',
+  95: 'icon-storm.webp',
+  96: 'icon-storm.webp',
+  99: 'icon-storm.webp',
+};
+
+function getWeatherIcon(code) {
+  return `assets/images/${WMO_ICON[code] ?? 'icon-overcast.webp'}`;
+}
+
+// Nombres cortos de día (en-US)
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function shortDay(dateStr) {
+  return DAY_NAMES[new Date(dateStr + 'T12:00:00').getDay()];
+}
 
 const input     = document.getElementById('cityInput');
 const list      = document.getElementById('resultsList');
@@ -115,3 +151,79 @@ function esc(str) {
   d.textContent = str ?? '';
   return d.innerHTML;
 }
+
+// ── AGREGAR: Forecast de Berlin al cargar la página ──
+async function loadBerlinForecast() {
+  showForecastSkeleton();
+
+  try {
+    const url = `${WEATHER_API}?latitude=52.5244&longitude=13.4105` +
+            `&daily=temperature_2m_max,temperature_2m_min,weathercode` +
+            `&current_weather=true` +
+            `&timezone=auto&forecast_days=7`;
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    renderForecast(data.daily);
+    renderWeatherCard('Berlin, Germany', data.current_weather);
+  } catch (err) {
+    console.error('[forecast]', err);
+    hideForecastSkeleton(); // deja el skeleton visible o muestra error
+  }
+}
+
+function renderForecast(daily) {
+  const grid = document.getElementById('forecastGrid');
+  grid.innerHTML = '';
+
+  daily.time.forEach((dateStr, i) => {
+    const isToday = i === 0;
+    const card = document.createElement('div');
+    card.className = 'forecast-card' + (isToday ? ' is-today' : '');
+
+    const high = Math.round(daily.temperature_2m_max[i]);
+    const low  = Math.round(daily.temperature_2m_min[i]);
+    const icon = getWeatherIcon(daily.weathercode[i]);
+
+    card.innerHTML = `
+      <span class="fc-day">${shortDay(dateStr)}</span>
+      <img class="fc-icon" src="${icon}" alt="weather icon" />
+      <div class="fc-temps">
+        <span class="fc-high">${high}°</span>
+        <span class="fc-low">${low}°</span>
+      </div>`;
+
+    grid.appendChild(card);
+  });
+
+  hideForecastSkeleton();
+}
+
+function renderWeatherCard(cityName, current) {
+  // Fecha legible: "Tuesday, Aug 5, 2025"
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'short', day: 'numeric', year: 'numeric'
+  });
+
+  document.querySelector('.weather-city').textContent = cityName;
+  document.querySelector('.weather-date').textContent = dateStr;
+  document.querySelector('.weather-temp').textContent = `${Math.round(current.temperature)}°`;
+
+  const iconEl = document.querySelector('.weather-card .weather-icon');
+  iconEl.src = getWeatherIcon(current.weathercode);
+  iconEl.alt = WMO_ICON[current.weathercode] ?? 'weather icon';
+}
+
+function showForecastSkeleton() {
+  document.getElementById('forecastSkeleton').classList.add('is-loading');
+  document.getElementById('forecastGrid').classList.add('is-loading');
+}
+
+function hideForecastSkeleton() {
+  document.getElementById('forecastSkeleton').classList.remove('is-loading');
+  document.getElementById('forecastGrid').classList.remove('is-loading');
+}
+
+// Ejecutar al cargar
+loadBerlinForecast();
