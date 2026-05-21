@@ -58,12 +58,32 @@
     <!-- Tarjeta principal del clima -->
     <section class="weather-card">
       <div class="weather-card-left">
-        <h2 class="weather-city">Berlin, Germany</h2>
-        <p class="weather-date">Tuesday, Aug 5, 2025</p>
+        <h2 class="weather-city"></h2>
+        <p class="weather-date"></p>
       </div>
       <div class="weather-card-right">
-        <img src="assets/images/icon-sunny.webp" alt="Sunny" class="weather-icon" />
-        <p class="weather-temp">68°</p>
+        <img src="assets/images/icon-loading.svg" class="weather-icon" />
+        <p class="weather-temp"></p>
+      </div>
+    </section>
+    <!-- ── Daily Forecast ── -->
+    <section class="forecast-widget">
+      <h2 class="forecast-title">Daily forecast</h2>
+ 
+      <!-- Loaded state -->
+      <div class="forecast-grid" id="forecastGrid">
+        <!-- JS populates this -->
+      </div>
+ 
+      <!-- Loading skeleton (shown while fetching, hidden by JS once ready) -->
+      <div class="forecast-grid forecast-grid--skeleton" id="forecastSkeleton" aria-hidden="true">
+        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
       </div>
     </section>
   </main>
