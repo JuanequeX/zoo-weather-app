@@ -506,3 +506,88 @@ h1 {
   font-weight: 600;
   color: var(--text);
 }
+/* ── Units Dropdown Menu ── */
+.units-dropdown {
+  position: relative;
+}
+
+.units-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 0;
+  z-index: 300;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.units-menu.open {
+  display: block;
+}
+
+/* Botón "Switch to Imperial" */
+.units-switch-btn {
+  width: calc(100% - 24px);
+  margin: 8px 12px 12px;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.units-switch-btn:hover {
+  background: var(--item-hover);
+}
+/* Labels de categoría */
+.units-label {
+  padding: 8px 16px 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  text-transform: capitalize;
+}
+/* Lista sin viñetas */
+.units-menu ul {
+  list-style: none;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.units-menu ul:last-of-type {
+  border-bottom: none;
+}
+/* Cada opción */
+.units-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  font-size: 0.88rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.units-option:hover {
+  background: var(--item-hover);
+}
+/* Checkmark oculto por defecto */
+.units-check {
+  display: none;
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+/* Solo se muestra en la opción activa */
+.units-option.active .units-check {
+  display: inline;
+  background: var(--item-hover);
+}

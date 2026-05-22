@@ -15,14 +15,53 @@
   </div>
 
   <div class="units-dropdown">
-    <button class="units-btn" id="unitsBtn">
-      <img src="assets/images/icon-units.svg" alt="units" height="14" />
-      Units
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-        <polyline points="6 9 12 15 18 9"/>
-      </svg>
-    </button>
+  <button class="units-btn" id="unitsBtn">
+    <img src="assets/images/icon-units.svg" alt="units" height="14" />
+    Units
+    <img src="assets/images/icon-dropdown.svg" alt="dropdown" class="dropdown-icon" height="7" />
+  </button>
+
+  <!-- ✅ NUEVO: menú desplegable -->
+  <div class="units-menu" id="unitsMenu">
+
+    <!-- Botón rápido para cambiar todo -->
+    <button class="units-switch-btn" id="unitsSwitchBtn">Switch to Imperial</button>
+
+    <!-- Sección Temperature -->
+    <p class="units-label">Temperature</p>
+    <ul>
+      <li class="units-option active" data-group="temp" data-value="celsius">
+        Celsius (°C) <span class="units-check">✓</span>
+      </li>
+      <li class="units-option" data-group="temp" data-value="fahrenheit">
+  Fahrenheit (°F) <span class="units-check">✓</span>
+</li>
+    </ul>
+
+    <!-- Sección Wind Speed -->
+    <p class="units-label">Wind Speed</p>
+    <ul>
+      <li class="units-option active" data-group="wind" data-value="kmh">
+        km/h <span class="units-check">✓</span>
+      </li>
+      <li class="units-option" data-group="wind" data-value="mph">
+  mph <span class="units-check">✓</span>
+</li>
+    </ul>
+
+    <!-- Sección Precipitation -->
+    <p class="units-label">Precipitation</p>
+    <ul>
+      <li class="units-option active" data-group="precip" data-value="mm">
+        Millimeters (mm) <span class="units-check">✓</span>
+      </li>
+      <li class="units-option" data-group="precip" data-value="inches">
+  Inches (in) <span class="units-check">✓</span>
+</li>
+    </ul>
+
   </div>
+</div>
 </header>
 </div>
 </section>
