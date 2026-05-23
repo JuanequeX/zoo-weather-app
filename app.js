@@ -174,12 +174,12 @@ function renderHourlyForecast(hourly) {
   const list = document.querySelector('.hourly-list');
   if (!list) return;
 
-  const now   = new Date();
+  const now = new Date();
   const currentHour = now.getHours();
 
   // Filter the next 8 hours from now
   const nowHour = new Date().getHours();
-const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
 
 const slots = [];
 for (let i = 0; i < hourly.time.length && slots.length < 8; i++) {
