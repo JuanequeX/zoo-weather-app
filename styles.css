@@ -287,7 +287,7 @@ h1 {
   border-radius: 16px;
   padding: 22px 20px;
 }
- 
+
 .forecast-title {
   font-size: 0.78rem;
   font-weight: 600;
@@ -296,14 +296,14 @@ h1 {
   color: var(--muted);
   margin-bottom: 16px;
 }
- 
+
 /* ── Grid ── */
 .forecast-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 6px;
 }
- 
+
 /* ── Card ── */
 .forecast-card {
   background: var(--fc-card);
@@ -321,13 +321,13 @@ h1 {
   background: var(--fc-card-hover);
   transform: translateY(-2px);
 }
- 
+
 /* Today highlight */
 .forecast-card.is-today {
   background: linear-gradient(160deg, #1c2f54 0%, #182848 100%);
   border-color: rgba(79,110,247,0.3);
 }
- 
+
 .fc-day {
   font-size: 0.7rem;
   font-weight: 600;
@@ -336,16 +336,16 @@ h1 {
   text-transform: uppercase;
 }
 .forecast-card.is-today .fc-day { color: var(--accent); }
- 
+
 .fc-icon {
   width: 32px;
   height: 32px;
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
- 
+
 .fc-temps { display: flex; flex-direction: column; align-items: center; gap: 2px; }
- 
+
 .fc-high {
   font-size: 0.95rem;
   font-weight: 600;
@@ -431,7 +431,7 @@ h1 {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-/* Encabezado: Título y Selector de día */
+/* Header: Title and Day Selector */
 .hourly-header {
   display: flex;
   justify-content: space-between;
@@ -445,7 +445,7 @@ h1 {
   color: var(--text);
 }
 
-/* Contenedor del select personalizado */
+/* Custom Select Container */
 .select-wrapper select {
   background: var(--input-bg);
   color: var(--text);
@@ -458,14 +458,14 @@ h1 {
   outline: none;
 }
 
-/* Lista de filas por hora */
+/* List of rows for hour */
 .hourly-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* Cada fila horaria */
+/* Each hour row */
 .hourly-item {
   display: flex;
   justify-content: space-between;
@@ -481,7 +481,7 @@ h1 {
   background: var(--item-hover);
 }
 
-/* Grupo de icono y hora */
+/* Icon and time group */
 .hourly-time-info {
   display: flex;
   align-items: center;
@@ -500,7 +500,7 @@ h1 {
   color: var(--text);
 }
 
-/* Temperatura */
+/* Temperature */
 .hourly-temp {
   font-size: 0.95rem;
   font-weight: 600;
@@ -590,4 +590,32 @@ h1 {
 .units-option.active .units-check {
   display: inline;
   background: var(--item-hover);
+}
+
+.content-grid {
+  width: 100%;
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  align-items: start;
+}
+
+
+.content-left {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.weather-card,
+.forecast-widget,
+.hourly-forecast {
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
 }
