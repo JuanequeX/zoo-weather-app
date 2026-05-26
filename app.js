@@ -227,3 +227,84 @@ function hideForecastSkeleton() {
 
 // Ejecutar al cargar
 loadBerlinForecast();
+// ── Units Dropdown ──
+const unitsBtn    = document.getElementById('unitsBtn');
+const unitsMenu   = document.getElementById('unitsMenu');
+const unitsSwitchBtn = document.getElementById('unitsSwitchBtn');
+
+// Estado actual de unidades
+const currentUnits = {
+  temp:   'celsius',
+  wind:   'kmh',
+  precip: 'mm'
+};
+
+// Abrir / cerrar al hacer clic en el botón
+unitsBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  unitsMenu.classList.toggle('open');
+});
+
+// Cerrar si el usuario hace clic fuera
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.units-dropdown')) {
+    unitsMenu.classList.remove('open');
+  }
+});
+
+// Clic en una opción individual
+document.querySelectorAll('.units-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const group = option.dataset.group;
+    const value = option.dataset.value;
+
+    // Quitar active de todas las opciones del mismo grupo
+    document.querySelectorAll(`.units-option[data-group="${group}"]`)
+      .forEach(opt => opt.classList.remove('active'));
+
+    // Poner active en la elegida
+    option.classList.add('active');
+
+    // Guardar en estado
+    currentUnits[group] = value;
+
+    // Actualizar texto del botón switch
+    updateSwitchBtn();
+
+    console.log('Unidades actuales:', currentUnits);
+  });
+});
+
+// Botón "Switch to Imperial" / "Switch to Metric"
+unitsSwitchBtn.addEventListener('click', () => {
+  const isMetric = currentUnits.temp === 'celsius';
+
+  if (isMetric) {
+    setUnit('temp',   'fahrenheit');
+    setUnit('wind',   'mph');
+    setUnit('precip', 'inches');
+  } else {
+    setUnit('temp',   'celsius');
+    setUnit('wind',   'kmh');
+    setUnit('precip', 'mm');
+  }
+
+  updateSwitchBtn();
+});
+
+// Función para cambiar una unidad y actualizar el DOM
+function setUnit(group, value) {
+  document.querySelectorAll(`.units-option[data-group="${group}"]`)
+    .forEach(opt => opt.classList.remove('active'));
+
+  document.querySelector(`.units-option[data-group="${group}"][data-value="${value}"]`)
+    .classList.add('active');
+
+  currentUnits[group] = value;
+}
+
+// Actualiza el texto del botón switch según el estado actual
+function updateSwitchBtn() {
+  const isMetric = currentUnits.temp === 'celsius';
+  unitsSwitchBtn.textContent = isMetric ? 'Switch to Imperial' : 'Switch to Metric';
+}
