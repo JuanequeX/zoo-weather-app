@@ -63,155 +63,147 @@
   </div>
 </div>
 </header>
-</div>
-</section>
+
   <main class="container">
-    <h1>How's the sky looking today?</h1>
+  <h1>How's the sky looking today?</h1>
 
-    <div class="search-wrap">
-      <div class="search-row">
-        <div class="search-box">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input
-            type="text"
-            id="cityInput"
-            placeholder="Search for a place..."
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <div class="loader" id="loader"></div>
-        </div>
-        <button id="searchBtn">Search</button>
+  <div class="search-wrap">
+    <div class="search-row">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="text"
+          id="cityInput"
+          placeholder="Search for a place..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div class="loader" id="loader"></div>
       </div>
-
- <section class="hourly-forecast">
-  <div class="hourly-header">
-    <h2>Hourly forecast</h2>
-    <div class="select-wrapper">
-      <select id="daySelect">
-        <option value="Monday">Monday</option>
-        <option value="tuesday">Tuesday</option>
-        <option value="Wednesday">Wednesday</option>
-        <option value="Thursday">Thursday</option>
-        <option value="Friday">Friday</option>
-        <option value="Saturday">Saturday</option>
-        <option value="Sunday">Sunday</option>
-      </select>
-    </div>
- </div>
-
-   <div class="hourly-list">
-    <div class="hourly-item">
-      <div class="hourly-time-info">
-        <img src="assets/images/icon-drizzle.webp" alt="Cloudy" class="weather-icon-mini">
-        <span class="hourly-time">3 PM</span>
-      </div>
-      <span class="hourly-temp">20°</span>
+      <button id="searchBtn">Search</button>
     </div>
 
-    <div class="hourly-item">
-      <div class="hourly-time-info">
-        <img src="assets/images/icon-fog.webp" alt="Partly cloudy" class="weather-icon-mini">
-        <span class="hourly-time">4 PM</span>
-      </div>
-      <span class="hourly-temp">20°</span>
-    </div>
-
-    <div class="hourly-item">
-      <div class="hourly-time-info">
-        <img src="assets/images/icon-overcast.webp" alt="Sunny" class="weather-icon-mini">
-        <span class="hourly-time">5 PM</span>
-      </div>
-      <span class="hourly-temp">20°</span>
-    </div>
-
-    <div class="hourly-item">
-      <div class="hourly-time-info">
-        <img src="assets/images/icon-partly-cloudy.webp" alt="Cloudy" class="weather-icon-mini">
-        <span class="hourly-time">6 PM</span>
-      </div>
-      <span class="hourly-temp">19°</span>
-    </div>
-
-    <div class="hourly-list">
-    <div class="hourly-item">
-      <div class="hourly-time-info">
-        <img src="assets/images/icon-partly-cloudy.webp" alt="Cloudy" class="weather-icon-mini">
-        <span class="hourly-time">7 PM</span>
-      </div>
-      <span class="hourly-temp">20°</span>
-    </div>
-
-    <div class="hourly-list">
-    <div class="hourly-item">
-      <div class="hourly-time-info">
-        <img src="assets/images/icon-rain.webp" alt="Cloudy" class="weather-icon-mini">
-        <span class="hourly-time">8 PM</span>
-      </div>
-      <span class="hourly-temp">450°</span>
-    </div>
-
-    <div class="hourly-list">
-    <div class="hourly-item">
-      <div class="hourly-time-info">
-        <img src="assets/images/icon-snow.webp" alt="Cloudy" class="weather-icon-mini">
-        <span class="hourly-time">9 PM</span>
-      </div>
-      <span class="hourly-temp">0°</span>
-    </div>
-
-    <div class="hourly-list">
-    <div class="hourly-item">
-      <div class="hourly-time-info">
-        <img src="assets/images/icon-fog.webp" alt="Cloudy" class="weather-icon-mini">
-        <span class="hourly-time">10 PM</span>
-      </div>
-      <span class="hourly-temp">100°</span>
+    <div class="dropdown" id="dropdown">
+      <ul class="results-list" id="resultsList" role="listbox"></ul>
     </div>
   </div>
- </section>
-      <!-- Dropdown results -->
-      <div class="dropdown" id="dropdown">
-        <ul class="results-list" id="resultsList" role="listbox"></ul>
-      </div>
+  <p class="no-results-msg" id="noResults"></p>
+
+  <div class="content-grid">
+    <div class="content-left">
+      <section class="weather-card">
+        <div class="weather-card-left">
+          <h2 class="weather-city"></h2>
+          <p class="weather-date"></p>
+        </div>
+        <div class="weather-card-right">
+          <img src="assets/images/icon-loading.svg" class="weather-icon" />
+          <p class="weather-temp"></p>
+        </div>
+      </section>
+
+      <section class="forecast-widget">
+        <h2 class="forecast-title">Daily forecast</h2>
+        <div class="forecast-grid" id="forecastGrid"></div>
+        <div class="forecast-grid forecast-grid--skeleton" id="forecastSkeleton" aria-hidden="true">
+          <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+          <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+          <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+          <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+          <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+          <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+          <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
+        </div>
+      </section>
     </div>
 
-    <!-- Empty state -->
-    <p class="no-results-msg" id="noResults"></p>
-    <!-- Tarjeta principal del clima -->
-    <section class="weather-card">
-      <div class="weather-card-left">
-        <h2 class="weather-city"></h2>
-        <p class="weather-date"></p>
+    <section class="hourly-forecast">
+      <div class="hourly-header">
+        <h2>Hourly forecast</h2>
+        <div class="select-wrapper">
+          <select id="daySelect">
+            <option value="Monday">Monday</option>
+            <option value="tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+            <option value="Sunday">Sunday</option>
+          </select>
+        </div>
       </div>
-      <div class="weather-card-right">
-        <img src="assets/images/icon-loading.svg" class="weather-icon" />
-        <p class="weather-temp"></p>
+
+      <div class="hourly-list">
+        <div class="hourly-item">
+          <div class="hourly-time-info">
+            <img src="assets/images/icon-drizzle.webp" alt="Cloudy" class="weather-icon-mini">
+            <span class="hourly-time">3 PM</span>
+          </div>
+          <span class="hourly-temp">20°</span>
+        </div>
+
+        <div class="hourly-item">
+          <div class="hourly-time-info">
+            <img src="assets/images/icon-fog.webp" alt="Partly cloudy" class="weather-icon-mini">
+            <span class="hourly-time">4 PM</span>
+          </div>
+          <span class="hourly-temp">20°</span>
+        </div>
+
+        <div class="hourly-item">
+          <div class="hourly-time-info">
+            <img src="assets/images/icon-overcast.webp" alt="Sunny" class="weather-icon-mini">
+            <span class="hourly-time">5 PM</span>
+          </div>
+          <span class="hourly-temp">20°</span>
+        </div>
+
+        <div class="hourly-item">
+          <div class="hourly-time-info">
+            <img src="assets/images/icon-partly-cloudy.webp" alt="Cloudy" class="weather-icon-mini">
+            <span class="hourly-time">6 PM</span>
+          </div>
+          <span class="hourly-temp">19°</span>
+        </div>
+
+        <div class="hourly-item">
+          <div class="hourly-time-info">
+            <img src="assets/images/icon-partly-cloudy.webp" alt="Cloudy" class="weather-icon-mini">
+            <span class="hourly-time">7 PM</span>
+          </div>
+          <span class="hourly-temp">20°</span>
+        </div>
+
+        <div class="hourly-item">
+          <div class="hourly-time-info">
+            <img src="assets/images/icon-rain.webp" alt="Cloudy" class="weather-icon-mini">
+            <span class="hourly-time">8 PM</span>
+          </div>
+          <span class="hourly-temp">450°</span>
+        </div>
+
+        <div class="hourly-item">
+          <div class="hourly-time-info">
+            <img src="assets/images/icon-snow.webp" alt="Cloudy" class="weather-icon-mini">
+            <span class="hourly-time">9 PM</span>
+          </div>
+          <span class="hourly-temp">0°</span>
+        </div>
+
+        <div class="hourly-item">
+          <div class="hourly-time-info">
+            <img src="assets/images/icon-fog.webp" alt="Cloudy" class="weather-icon-mini">
+            <span class="hourly-time">10 PM</span>
+          </div>
+          <span class="hourly-temp">100°</span>
+        </div>
       </div>
     </section>
-    <!-- ── Daily Forecast ── -->
-    <section class="forecast-widget">
-      <h2 class="forecast-title">Daily forecast</h2>
- 
-      <!-- Loaded state -->
-      <div class="forecast-grid" id="forecastGrid">
-        <!-- JS populates this -->
-      </div>
- 
-      <!-- Loading skeleton (shown while fetching, hidden by JS once ready) -->
-      <div class="forecast-grid forecast-grid--skeleton" id="forecastSkeleton" aria-hidden="true">
-        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
-        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
-        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
-        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
-        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
-        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
-        <div class="forecast-card"><div class="skeleton sk-day"></div><div class="skeleton sk-icon"></div><div class="sk-temps"><div class="skeleton sk-high"></div><div class="skeleton sk-low"></div></div></div>
-      </div>
-    </section>
-  </main>
+
+  </div>
+</main>
   <script src="app.js"></script>
 </body>
 </html>

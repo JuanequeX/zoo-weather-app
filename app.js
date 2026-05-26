@@ -127,14 +127,9 @@ function renderResults(cities) {
 /* ── Select ── */
 function onSelect(city) {
   const region = [city.admin1, city.country].filter(Boolean).join(', ');
-  input.value  = `${city.name}${region ? ', ' + region : ''}`;
+  input.value = `${city.name}${region ? ', ' + region : ''}`;
   closeDropdown();
-  console.log('Selected:', city);
-  alert(
-    `📍 ${city.name}${region ? ', ' + region : ''}\n` +
-    `Lat: ${city.latitude}   Lon: ${city.longitude}\n\n` +
-    `Hook this up to your weather endpoint!`
-  );
+  loadCityForecast(city.latitude, city.longitude, city.name + (region ? ', ' + region : ''));
 }
 
 /* ── Helpers ── */
@@ -152,7 +147,76 @@ function esc(str) {
   return d.innerHTML;
 }
 
-// ── AGREGAR: Forecast de Berlin al cargar la página ──
+async function loadCityForecast(lat, lon, cityName) {
+  showForecastSkeleton();
+
+  try {
+    const url = `${WEATHER_API}?latitude=${lat}&longitude=${lon}` +
+      `&daily=temperature_2m_max,temperature_2m_min,weathercode` +
+      `&hourly=temperature_2m,weathercode` +
+      `&current_weather=true` +
+      `&timezone=auto&forecast_days=7`;
+
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    renderForecast(data.daily);
+    renderWeatherCard(cityName, data.current_weather);
+    renderHourlyForecast(data.hourly);
+  } catch (err) {
+    console.error('[forecast]', err);
+    hideForecastSkeleton();
+  }
+}
+
+function renderHourlyForecast(hourly) {
+  const list = document.querySelector('.hourly-list');
+  if (!list) return;
+
+  const now = new Date();
+  const currentHour = now.getHours();
+
+  // Filter the next 8 hours from now
+  const nowHour = new Date().getHours();
+  const today = new Date().toISOString().slice(0, 10);
+
+const slots = [];
+for (let i = 0; i < hourly.time.length && slots.length < 8; i++) {
+  const slotDate = hourly.time[i].slice(0, 10);
+  const slotHour = parseInt(hourly.time[i].slice(11, 13));
+
+  if (slotDate === today && slotHour >= nowHour) {
+    slots.push({
+      time: hourly.time[i],
+      temp: hourly.temperature_2m[i],
+      code: hourly.weathercode[i]
+    });
+  } else if (slotDate > today) {
+    slots.push({
+      time: hourly.time[i],
+      temp: hourly.temperature_2m[i],
+      code: hourly.weathercode[i]
+    });
+  }
+}
+
+  list.innerHTML = slots.map(slot => {
+    const date   = new Date(slot.time);
+    const label  = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+    const icon   = getWeatherIcon(slot.code);
+    const temp   = Math.round(slot.temp);
+    return `
+      <div class="hourly-item">
+        <div class="hourly-time-info">
+          <img src="${icon}" alt="weather" class="weather-icon-mini">
+          <span class="hourly-time">${label}</span>
+        </div>
+        <span class="hourly-temp">${temp}°</span>
+      </div>`;
+  }).join('');
+}
+// ── ADD: Berlin Forecast on page load ──
 async function loadBerlinForecast() {
   showForecastSkeleton();
 
@@ -168,7 +232,7 @@ async function loadBerlinForecast() {
     renderWeatherCard('Berlin, Germany', data.current_weather);
   } catch (err) {
     console.error('[forecast]', err);
-    hideForecastSkeleton(); // deja el skeleton visible o muestra error
+    hideForecastSkeleton(); // Leave the skeleton visible or display an error
   }
 }
 
@@ -200,7 +264,7 @@ function renderForecast(daily) {
 }
 
 function renderWeatherCard(cityName, current) {
-  // Fecha legible: "Tuesday, Aug 5, 2025"
+  // Readable date: "Tuesday, Aug 5, 2025"
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', {
     weekday: 'long', month: 'short', day: 'numeric', year: 'numeric'
