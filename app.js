@@ -1,42 +1,99 @@
-const API_BASE  = 'https://geocoding-api.open-meteo.com/v1/search';
+const API_BASE    = 'https://geocoding-api.open-meteo.com/v1/search';
 const WEATHER_API = 'https://api.open-meteo.com/v1/forecast';
-const DEBOUNCE  = 400;
+const DEBOUNCE    = 400;
 
-// Iconos según WMO weathercode (open-meteo)
+// ── Datos crudos guardados globalmente (siempre en métrico) ──
+let rawData = null; // { current, hourly, daily, cityName }
+
+// ── Iconos según WMO weathercode ──
 const WMO_ICON = {
-  0:  'icon-sunny.webp',
-  1:  'icon-sunny.webp',
-  2:  'icon-partly-cloudy.webp',
-  3:  'icon-overcast.webp',
-  45: 'icon-fog.webp',
-  48: 'icon-fog.webp',
-  51: 'icon-drizzle.webp',
-  53: 'icon-drizzle.webp',
-  55: 'icon-drizzle.webp',
-  61: 'icon-rain.webp',
-  63: 'icon-rain.webp',
-  65: 'icon-rain.webp',
-  71: 'icon-snow.webp',
-  73: 'icon-snow.webp',
-  75: 'icon-snow.webp',
-  80: 'icon-rain.webp',
-  81: 'icon-rain.webp',
-  82: 'icon-rain.webp',
-  95: 'icon-storm.webp',
-  96: 'icon-storm.webp',
-  99: 'icon-storm.webp',
+  0:  'icon-sunny.webp',   1: 'icon-sunny.webp',
+  2:  'icon-partly-cloudy.webp', 3: 'icon-overcast.webp',
+  45: 'icon-fog.webp',    48: 'icon-fog.webp',
+  51: 'icon-drizzle.webp', 53: 'icon-drizzle.webp', 55: 'icon-drizzle.webp',
+  61: 'icon-rain.webp',   63: 'icon-rain.webp',    65: 'icon-rain.webp',
+  71: 'icon-snow.webp',   73: 'icon-snow.webp',    75: 'icon-snow.webp',
+  80: 'icon-rain.webp',   81: 'icon-rain.webp',    82: 'icon-rain.webp',
+  95: 'icon-storm.webp',  96: 'icon-storm.webp',   99: 'icon-storm.webp',
 };
 
 function getWeatherIcon(code) {
   return `assets/images/${WMO_ICON[code] ?? 'icon-overcast.webp'}`;
 }
 
-// Nombres cortos de día (en-US)
+
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 function shortDay(dateStr) {
   return DAY_NAMES[new Date(dateStr + 'T12:00:00').getDay()];
 }
 
+// ════════════════════════════════════════
+// CONVERSIONES
+// ════════════════════════════════════════
+function toTemp(celsius) {
+  if (currentUnits.temp === 'fahrenheit') return Math.round(celsius * 9/5 + 32) + '°F';
+  return Math.round(celsius) + '°C';
+}
+
+function toTempBare(celsius) {
+  // Solo el número + símbolo, sin etiqueta de unidad (para forecast)
+  if (currentUnits.temp === 'fahrenheit') return Math.round(celsius * 9/5 + 32) + '°';
+  return Math.round(celsius) + '°';
+}
+
+function toWind(kmh) {
+  if (currentUnits.wind === 'mph') return (kmh * 0.621371).toFixed(1) + ' mph';
+  return Math.round(kmh) + ' km/h';
+}
+
+function toPrecip(mm) {
+  if (currentUnits.precip === 'inches') return (mm * 0.0393701).toFixed(2) + ' in';
+  return mm + ' mm';
+}
+
+// ════════════════════════════════════════
+// RE-RENDER con unidades actuales
+// ════════════════════════════════════════
+function refreshDisplayedUnits() {
+  if (!rawData) return;
+
+  const { current, hourly, daily, cityName } = rawData;
+
+  // 1. Tarjeta principal — temperatura actual
+  document.querySelector('.weather-temp').textContent = toTempBare(current.temperature);
+
+  // 2. Tarjetas de stats — buscar hora actual en hourly
+  const nowISO = new Date().toISOString().slice(0, 13);
+  const idx = hourly.time.findIndex(t => t.startsWith(nowISO));
+  const i = idx !== -1 ? idx : 0;
+
+  document.getElementById('statFeelsLike').textContent = toTempBare(hourly.apparent_temperature[i]);
+  document.getElementById('statHumidity').textContent  = `${hourly.relativehumidity_2m[i]}%`;
+  document.getElementById('statWind').textContent      = toWind(hourly.windspeed_10m[i]);
+  document.getElementById('statPrecip').textContent    = toPrecip(hourly.precipitation[i]);
+
+  // 3. Forecast diario
+  const cards = document.querySelectorAll('.forecast-card');
+  daily.time.forEach((_, idx) => {
+    const card = cards[idx];
+    if (!card) return;
+    card.querySelector('.fc-high').textContent = toTempBare(daily.temperature_2m_max[idx]);
+    card.querySelector('.fc-low').textContent  = toTempBare(daily.temperature_2m_min[idx]);
+  });
+
+  // 4. Forecast horario
+  const hourlyItems = document.querySelectorAll('.hourly-item');
+  hourlyItems.forEach((item, idx) => {
+    const tempEl = item.querySelector('.hourly-temp');
+    if (tempEl && item._rawTemp !== undefined) {
+      tempEl.textContent = toTempBare(item._rawTemp);
+    }
+  });
+}
+
+// ════════════════════════════════════════
+// SEARCH
+// ════════════════════════════════════════
 const input     = document.getElementById('cityInput');
 const list      = document.getElementById('resultsList');
 const dropdown  = document.getElementById('dropdown');
@@ -46,7 +103,7 @@ const searchBtn = document.getElementById('searchBtn');
 
 let debounceTimer = null;
 
-/* ── Events ── */
+
 input.addEventListener('input', () => {
   clearTimeout(debounceTimer);
   const q = input.value.trim();
@@ -64,12 +121,12 @@ searchBtn.addEventListener('click', () => {
   fetchCities(input.value.trim());
 });
 
-// Close dropdown on outside click
+
 document.addEventListener('click', e => {
   if (!e.target.closest('.search-wrap')) reset();
 });
 
-/* ── Fetch ── */
+
 async function fetchCities(query) {
   if (!query) return;
   setLoading(true);
@@ -88,20 +145,14 @@ async function fetchCities(query) {
   }
 }
 
-/* ── Render ── */
+
 function renderResults(cities) {
   clearDropdown();
-
-  if (!cities.length) {
-    closeDropdown();
-    showNoResults();
-    return;
-  }
-
+  if (!cities.length) { closeDropdown(); showNoResults(); return; }
   hideNoResults();
 
   cities.forEach(city => {
-    const li     = document.createElement('li');
+    const li = document.createElement('li');
     li.className = 'result-item';
     li.setAttribute('role', 'option');
 
@@ -114,8 +165,7 @@ function renderResults(cities) {
         <div class="result-city">${esc(city.name)}</div>
         <div class="result-region">${esc(region)}</div>
       </div>
-      <div class="result-coords">${lat}, ${lon}</div>
-    `;
+      <div class="result-coords">${lat}, ${lon}</div>`;
 
     li.addEventListener('click', () => onSelect(city));
     list.appendChild(li);
@@ -124,7 +174,7 @@ function renderResults(cities) {
   openDropdown();
 }
 
-/* ── Select ── */
+
 function onSelect(city) {
   const region = [city.admin1, city.country].filter(Boolean).join(', ');
   input.value = `${city.name}${region ? ', ' + region : ''}`;
@@ -132,7 +182,7 @@ function onSelect(city) {
   loadCityForecast(city.latitude, city.longitude, city.name + (region ? ', ' + region : ''));
 }
 
-/* ── Helpers ── */
+
 function openDropdown()  { dropdown.classList.add('open'); }
 function closeDropdown() { dropdown.classList.remove('open'); }
 function clearDropdown() { list.innerHTML = ''; closeDropdown(); }
@@ -147,22 +197,29 @@ function esc(str) {
   return d.innerHTML;
 }
 
+// ════════════════════════════════════════
+// FETCH FORECAST
+// ════════════════════════════════════════
 async function loadCityForecast(lat, lon, cityName) {
+
   showForecastSkeleton();
 
   try {
     const url = `${WEATHER_API}?latitude=${lat}&longitude=${lon}` +
       `&daily=temperature_2m_max,temperature_2m_min,weathercode` +
-      `&hourly=temperature_2m,weathercode` +
-      `&current_weather=true` +
-      `&timezone=auto&forecast_days=7`;
+      `&hourly=temperature_2m,weathercode,apparent_temperature,relativehumidity_2m,precipitation,windspeed_10m` +
+      `&current_weather=true&timezone=auto&forecast_days=7`;
 
     const res  = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
+    // Guardar datos crudos
+    rawData = { current: data.current_weather, hourly: data.hourly, daily: data.daily, cityName };
+
+    renderWeatherCard(cityName, data.current_weather, data.hourly);
     renderForecast(data.daily);
-    renderWeatherCard(cityName, data.current_weather);
+
     renderHourlyForecast(data.hourly);
   } catch (err) {
     console.error('[forecast]', err);
@@ -170,69 +227,58 @@ async function loadCityForecast(lat, lon, cityName) {
   }
 }
 
-function renderHourlyForecast(hourly) {
-  const list = document.querySelector('.hourly-list');
-  if (!list) return;
 
-  const now = new Date();
-  const currentHour = now.getHours();
-
-  // Filter the next 8 hours from now
-  const nowHour = new Date().getHours();
-  const today = new Date().toISOString().slice(0, 10);
-
-const slots = [];
-for (let i = 0; i < hourly.time.length && slots.length < 8; i++) {
-  const slotDate = hourly.time[i].slice(0, 10);
-  const slotHour = parseInt(hourly.time[i].slice(11, 13));
-
-  if (slotDate === today && slotHour >= nowHour) {
-    slots.push({
-      time: hourly.time[i],
-      temp: hourly.temperature_2m[i],
-      code: hourly.weathercode[i]
-    });
-  } else if (slotDate > today) {
-    slots.push({
-      time: hourly.time[i],
-      temp: hourly.temperature_2m[i],
-      code: hourly.weathercode[i]
-    });
-  }
-}
-
-  list.innerHTML = slots.map(slot => {
-    const date   = new Date(slot.time);
-    const label  = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
-    const icon   = getWeatherIcon(slot.code);
-    const temp   = Math.round(slot.temp);
-    return `
-      <div class="hourly-item">
-        <div class="hourly-time-info">
-          <img src="${icon}" alt="weather" class="weather-icon-mini">
-          <span class="hourly-time">${label}</span>
-        </div>
-        <span class="hourly-temp">${temp}°</span>
-      </div>`;
-  }).join('');
-}
-// ── ADD: Berlin Forecast on page load ──
 async function loadBerlinForecast() {
   showForecastSkeleton();
 
   try {
     const url = `${WEATHER_API}?latitude=52.5244&longitude=13.4105` +
-            `&daily=temperature_2m_max,temperature_2m_min,weathercode` +
-            `&current_weather=true` +
-            `&timezone=auto&forecast_days=7`;
+      `&daily=temperature_2m_max,temperature_2m_min,weathercode` +
+      `&hourly=temperature_2m,weathercode,apparent_temperature,relativehumidity_2m,precipitation,windspeed_10m` +
+      `&current_weather=true&timezone=auto&forecast_days=7`;
+
     const res  = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
+
+    // Guardar datos crudos
+    rawData = { current: data.current_weather, hourly: data.hourly, daily: data.daily, cityName: 'Berlin, Germany' };
+
+    renderWeatherCard('Berlin, Germany', data.current_weather, data.hourly);
     renderForecast(data.daily);
-    renderWeatherCard('Berlin, Germany', data.current_weather);
+    renderHourlyForecast(data.hourly);
   } catch (err) {
     console.error('[forecast]', err);
-    hideForecastSkeleton(); // Leave the skeleton visible or display an error
+    hideForecastSkeleton();
+  }
+}
+
+// ════════════════════════════════════════
+// RENDER FUNCTIONS
+// ════════════════════════════════════════
+function renderWeatherCard(cityName, current, hourly) {
+  const now     = new Date();
+  const dateStr = now.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'short', day: 'numeric', year: 'numeric'
+  });
+
+  document.querySelector('.weather-city').textContent = cityName;
+  document.querySelector('.weather-date').textContent = dateStr;
+  document.querySelector('.weather-temp').textContent = toTempBare(current.temperature);
+
+  const iconEl = document.querySelector('.weather-card .weather-icon');
+  iconEl.src = getWeatherIcon(current.weathercode);
+  iconEl.alt = WMO_ICON[current.weathercode] ?? 'weather icon';
+
+  if (hourly) {
+    const nowISO = new Date().toISOString().slice(0, 13);
+    const idx = hourly.time.findIndex(t => t.startsWith(nowISO));
+    const i = idx !== -1 ? idx : 0;
+
+    document.getElementById('statFeelsLike').textContent = toTempBare(hourly.apparent_temperature[i]);
+    document.getElementById('statHumidity').textContent  = `${hourly.relativehumidity_2m[i]}%`;
+    document.getElementById('statWind').textContent      = toWind(hourly.windspeed_10m[i]);
+    document.getElementById('statPrecip').textContent    = toPrecip(hourly.precipitation[i]);
   }
 }
 
@@ -241,20 +287,20 @@ function renderForecast(daily) {
   grid.innerHTML = '';
 
   daily.time.forEach((dateStr, i) => {
-    const isToday = i === 0;
-    const card = document.createElement('div');
-    card.className = 'forecast-card' + (isToday ? ' is-today' : '');
 
-    const high = Math.round(daily.temperature_2m_max[i]);
-    const low  = Math.round(daily.temperature_2m_min[i]);
+    const card = document.createElement('div');
+    card.className = 'forecast-card' + (i === 0 ? ' is-today' : '');
+
+
+    
     const icon = getWeatherIcon(daily.weathercode[i]);
 
     card.innerHTML = `
       <span class="fc-day">${shortDay(dateStr)}</span>
       <img class="fc-icon" src="${icon}" alt="weather icon" />
       <div class="fc-temps">
-        <span class="fc-high">${high}°</span>
-        <span class="fc-low">${low}°</span>
+        <span class="fc-high">${toTempBare(daily.temperature_2m_max[i])}</span>
+        <span class="fc-low">${toTempBare(daily.temperature_2m_min[i])}</span>
       </div>`;
 
     grid.appendChild(card);
@@ -263,20 +309,44 @@ function renderForecast(daily) {
   hideForecastSkeleton();
 }
 
-function renderWeatherCard(cityName, current) {
-  // Readable date: "Tuesday, Aug 5, 2025"
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-US', {
-    weekday: 'long', month: 'short', day: 'numeric', year: 'numeric'
+function renderHourlyForecast(hourly) {
+  const list = document.querySelector('.hourly-list');
+  if (!list) return;
+
+  const nowHour = new Date().getHours();
+  const today   = new Date().toISOString().slice(0, 10);
+
+  const slots = [];
+  for (let i = 0; i < hourly.time.length && slots.length < 8; i++) {
+    const slotDate = hourly.time[i].slice(0, 10);
+    const slotHour = parseInt(hourly.time[i].slice(11, 13));
+
+    if ((slotDate === today && slotHour >= nowHour) || slotDate > today) {
+      slots.push({
+        time: hourly.time[i],
+        temp: hourly.temperature_2m[i],
+        code: hourly.weathercode[i]
+      });
+    }
+  }
+
+  list.innerHTML = slots.map(slot => {
+    const label = new Date(slot.time).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+    const icon  = getWeatherIcon(slot.code);
+    return `
+      <div class="hourly-item" data-raw-temp="${slot.temp}">
+        <div class="hourly-time-info">
+          <img src="${icon}" alt="weather" class="weather-icon-mini">
+          <span class="hourly-time">${label}</span>
+        </div>
+        <span class="hourly-temp">${toTempBare(slot.temp)}</span>
+      </div>`;
+  }).join('');
+
+  // Guardar temp cruda en el elemento para refresh posterior
+  list.querySelectorAll('.hourly-item').forEach(item => {
+    item._rawTemp = parseFloat(item.dataset.rawTemp);
   });
-
-  document.querySelector('.weather-city').textContent = cityName;
-  document.querySelector('.weather-date').textContent = dateStr;
-  document.querySelector('.weather-temp').textContent = `${Math.round(current.temperature)}°`;
-
-  const iconEl = document.querySelector('.weather-card .weather-icon');
-  iconEl.src = getWeatherIcon(current.weathercode);
-  iconEl.alt = WMO_ICON[current.weathercode] ?? 'weather icon';
 }
 
 function showForecastSkeleton() {
@@ -291,55 +361,46 @@ function hideForecastSkeleton() {
 
 // Ejecutar al cargar
 loadBerlinForecast();
-// ── Units Dropdown ──
-const unitsBtn    = document.getElementById('unitsBtn');
-const unitsMenu   = document.getElementById('unitsMenu');
+
+// ════════════════════════════════════════
+// UNITS DROPDOWN
+// ════════════════════════════════════════
+const unitsBtn       = document.getElementById('unitsBtn');
+const unitsMenu      = document.getElementById('unitsMenu');
 const unitsSwitchBtn = document.getElementById('unitsSwitchBtn');
 
-// Estado actual de unidades
-const currentUnits = {
-  temp:   'celsius',
-  wind:   'kmh',
-  precip: 'mm'
-};
+const currentUnits = { temp: 'celsius', wind: 'kmh', precip: 'mm' };
 
-// Abrir / cerrar al hacer clic en el botón
+
 unitsBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   unitsMenu.classList.toggle('open');
 });
 
-// Cerrar si el usuario hace clic fuera
+
 document.addEventListener('click', (e) => {
-  if (!e.target.closest('.units-dropdown')) {
-    unitsMenu.classList.remove('open');
-  }
+  if (!e.target.closest('.units-dropdown')) unitsMenu.classList.remove('open');
 });
 
-// Clic en una opción individual
+
 document.querySelectorAll('.units-option').forEach(option => {
   option.addEventListener('click', () => {
     const group = option.dataset.group;
     const value = option.dataset.value;
 
-    // Quitar active de todas las opciones del mismo grupo
+
     document.querySelectorAll(`.units-option[data-group="${group}"]`)
       .forEach(opt => opt.classList.remove('active'));
-
-    // Poner active en la elegida
-    option.classList.add('active');
-
-    // Guardar en estado
-    currentUnits[group] = value;
-
-    // Actualizar texto del botón switch
+    
+      option.classList.add('active');
+    
+      currentUnits[group] = value;
     updateSwitchBtn();
-
-    console.log('Unidades actuales:', currentUnits);
+    refreshDisplayedUnits(); // ← re-renderiza con nuevas unidades
   });
 });
 
-// Botón "Switch to Imperial" / "Switch to Metric"
+
 unitsSwitchBtn.addEventListener('click', () => {
   const isMetric = currentUnits.temp === 'celsius';
 
@@ -354,21 +415,21 @@ unitsSwitchBtn.addEventListener('click', () => {
   }
 
   updateSwitchBtn();
+  refreshDisplayedUnits(); // ← redirection new units
 });
 
-// Función para cambiar una unidad y actualizar el DOM
+
 function setUnit(group, value) {
   document.querySelectorAll(`.units-option[data-group="${group}"]`)
-    .forEach(opt => opt.classList.remove('active'));
-
+  .forEach(opt => opt.classList.remove('active'));
   document.querySelector(`.units-option[data-group="${group}"][data-value="${value}"]`)
-    .classList.add('active');
-
+  .classList.add('active');
   currentUnits[group] = value;
 }
 
-// Actualiza el texto del botón switch según el estado actual
+
 function updateSwitchBtn() {
-  const isMetric = currentUnits.temp === 'celsius';
-  unitsSwitchBtn.textContent = isMetric ? 'Switch to Imperial' : 'Switch to Metric';
+  unitsSwitchBtn.textContent = currentUnits.temp === 'celsius'
+    ? 'Switch to Imperial'
+    : 'Switch to Metric';
 }
