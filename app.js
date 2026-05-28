@@ -102,6 +102,8 @@ const loader    = document.getElementById('loader');
 const searchBtn = document.getElementById('searchBtn');
 
 let debounceTimer = null;
+let cachedHourly = null;
+let cachedCurrentTime = null;
 
 
 input.addEventListener('input', () => {
@@ -221,12 +223,14 @@ async function loadCityForecast(lat, lon, cityName) {
     renderForecast(data.daily);
 
     renderHourlyForecast(data.hourly);
+    renderWeatherCard(cityName, data.current_weather);
+    renderHourlyForecast(data.hourly, null, data.timezone);
+    populateDaySelect(data.daily.time);
   } catch (err) {
     console.error('[forecast]', err);
     hideForecastSkeleton();
   }
 }
-
 
 async function loadBerlinForecast() {
   showForecastSkeleton();
@@ -292,7 +296,7 @@ function renderForecast(daily) {
     card.className = 'forecast-card' + (i === 0 ? ' is-today' : '');
 
 
-    
+
     const icon = getWeatherIcon(daily.weathercode[i]);
 
     card.innerHTML = `
@@ -391,9 +395,9 @@ document.querySelectorAll('.units-option').forEach(option => {
 
     document.querySelectorAll(`.units-option[data-group="${group}"]`)
       .forEach(opt => opt.classList.remove('active'));
-    
+
       option.classList.add('active');
-    
+
       currentUnits[group] = value;
     updateSwitchBtn();
     refreshDisplayedUnits(); // ← re-renderiza con nuevas unidades
